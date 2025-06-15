@@ -1,0 +1,40 @@
+{
+  "name": "bot",
+  "version": "1.0.0",
+  "description": "Discord Bot for Private League Discord Server",
+  "keywords": [
+    "MecryTv",
+    "Rocket",
+    "League",
+    "Discord",
+    "Bot",
+    "Private",
+    "League",
+    "JavaScript",
+    "Discord.JS",
+    "Commandkit"
+  ],
+  "homepage": "https://github.com/MecryTv/PrivateLeague#readme",
+  "bugs": {
+    "url": "https://github.com/MecryTv/PrivateLeague/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MecryTv/PrivateLeague.git"
+  },
+  "license": "MIT",
+  "author": "MecryTv",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "bot": "node src/index.js",
+    "server": "node src/server.js"
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "commandkit": "^0.1.6",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0"
+  }
+}
