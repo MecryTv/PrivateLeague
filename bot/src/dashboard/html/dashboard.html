@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discord Bot</title>
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link
+      rel="icon"
+      href="https://cdn.discordapp.com/attachments/1162553851187040329/1386455810493644890/PrivateLeague2.png?ex=6859c518&is=68587398&hm=c0fd85304a6b9494997287ce3cd3ef76a50852c070289fccba5875ce679850a6&"
+    />
+  </head>
+  <body>
+    <!-- Header ganz oben und volle Breite -->
+    <header class="main-header">
+      <!-- Links: Bot Info -->
+      <div class="bot-section">
+        <img
+          src="https://cdn.discordapp.com/attachments/1162553851187040329/1386455810493644890/PrivateLeague2.png?ex=6859c518&is=68587398&hm=c0fd85304a6b9494997287ce3cd3ef76a50852c070289fccba5875ce679850a6&"
+          alt="Bot Logo"
+          class="bot-logo"
+        />
+        <h1 class="bot-name">Private League Bot</h1>
+      </div>
+
+      <!-- Rechts: User Info mit Avatar (jetzt klickbar) -->
+      <div class="user-section" id="user-section" onclick="toggleUserPopup()">
+        <img id="user-avatar" src="" alt="User Avatar" class="user-avatar" />
+        <div class="user-info">
+          <div id="displayname" class="user-displayname">Loading...</div>
+          <div id="rolename" class="user-rolename">Loading...</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- User Popup -->
+    <div class="user-popup" id="user-popup">
+      <div class="popup-content">
+        <div class="popup-header">
+          <img
+            id="popup-avatar"
+            src=""
+            alt="User Avatar"
+            class="popup-avatar"
+          />
+          <div class="popup-user-info">
+            <h3 id="popup-displayname">Loading...</h3>
+            <p id="popup-rolename" class="popup-role">Loading...</p>
+          </div>
+          <button class="popup-close" onclick="closeUserPopup()">✕</button>
+        </div>
+
+        <div class="popup-details">
+          <div class="detail-item">
+            <span class="detail-label">👤 User ID:</span>
+            <span id="popup-userid" class="detail-value">Loading...</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">📝 Username:</span>
+            <span id="popup-username" class="detail-value">Loading...</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">📅 Account:</span>
+            <span id="popup-account-age" class="detail-value">Loading...</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">🏠 Server:</span>
+            <span id="popup-guildname" class="detail-value">Loading...</span>
+          </div>
+        </div>
+
+        <div class="popup-actions">
+          <button class="logout-btn" onclick="logout()">Abmelden</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup Overlay -->
+    <div
+      class="popup-overlay"
+      id="popup-overlay"
+      onclick="closeUserPopup()"
+    ></div>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-content">
+      <div class="content-wrapper">
+        <!-- Hier kommt der Rest Ihres Dashboard-Inhalts -->
+        <h2>Dashboard</h2>
+        <p>Willkommen im Private League Bot Dashboard!</p>
+      </div>
+    </main>
+
+    <script>
+      // Discord Snowflake zu Datum konvertieren
+      function snowflakeToDate(snowflake) {
+        const timestamp = (BigInt(snowflake) >> 22n) + 1420070400000n;
+        return new Date(Number(timestamp));
+      }
+
+      // Account-Alter berechnen
+      function calculateAccountAge(userId) {
+        const createdDate = snowflakeToDate(userId);
+        const now = new Date();
+
+        const diffTime = now.getTime() - createdDate.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        // Jahre als Dezimalzahl berechnen (z.B. 2,5 Jahre)
+        const yearsDecimal = (diffDays / 365).toFixed(1);
+
+        const formattedDate = createdDate.toLocaleDateString("de-DE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+
+        return `${formattedDate} (${yearsDecimal} Jahre)`;
+      }
+
+      // User Popup öffnen/schließen
+      function toggleUserPopup() {
+        const popup = document.getElementById("user-popup");
+        const overlay = document.getElementById("popup-overlay");
+
+        if (popup.classList.contains("popup-active")) {
+          closeUserPopup();
+        } else {
+          popup.classList.add("popup-active");
+          overlay.classList.add("overlay-active");
+          updatePopupData();
+        }
+      }
+
+      function closeUserPopup() {
+        document.getElementById("user-popup").classList.remove("popup-active");
+        document
+          .getElementById("popup-overlay")
+          .classList.remove("overlay-active");
+      }
+
+      // Popup mit Daten füllen
+      function updatePopupData() {
+        if (typeof window.serverData !== "undefined") {
+          const data = window.serverData;
+
+          document.getElementById("popup-avatar").src = data.avatarUrl || "";
+          document.getElementById("popup-displayname").textContent =
+            data.displayName || "Unbekannt";
+          document.getElementById("popup-rolename").textContent =
+            `Rang: ${data.roleName}` || "Rang: Unbekannt";
+          document.getElementById("popup-userid").textContent =
+            data.userId || "Unbekannt";
+          document.getElementById("popup-username").textContent =
+            `${data.userName}` || "Unbekannt";
+          document.getElementById("popup-guildname").textContent =
+            data.guildName || "Unbekannt";
+
+          // Account-Alter berechnen
+          if (data.accountCreated || data.userId) {
+            const accountAge = calculateAccountAge(
+              data.accountCreated || data.userId
+            );
+            document.getElementById("popup-account-age").textContent =
+              accountAge;
+          }
+        }
+      }
+
+      // Logout Funktion
+      async function logout() {
+        try {
+          const response = await fetch("/api/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            window.location.href = "/";
+          } else {
+            alert("Fehler beim Abmelden");
+          }
+        } catch (error) {
+          console.error("Logout error:", error);
+          alert("Fehler beim Abmelden");
+        }
+      }
+
+      function updateDashboard() {
+        if (typeof window.serverData !== "undefined") {
+          const data = window.serverData;
+
+          // User Avatar setzen
+          if (data.avatarUrl) {
+            document.getElementById("user-avatar").src = data.avatarUrl;
+          }
+
+          // Display Name setzen
+          if (data.displayName) {
+            document.getElementById("displayname").textContent =
+              data.displayName;
+          }
+
+          // Rollenname setzen
+          if (data.roleName) {
+            document.getElementById(
+              "rolename"
+            ).textContent = `Rang: ${data.roleName}`;
+          }
+
+          // Username setzen
+          if (data.userName) {
+            document.getElementById(
+              "username"
+            ).textContent = `@${data.userName}`;
+          }
+
+          // User-Section klickbar machen
+          document.getElementById("user-section").style.cursor = "pointer";
+        } else {
+          document.getElementById("username").textContent =
+            "User nicht verfügbar";
+          document.getElementById("displayname").textContent =
+            "Display Name nicht verfügbar";
+          document.getElementById("rolename").textContent =
+            "Rolle nicht verfügbar";
+
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 2000);
+        }
+      }
+
+      // ESC-Taste schließt Popup
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          closeUserPopup();
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", updateDashboard);
+    </script>
+  </body>
+</html>
