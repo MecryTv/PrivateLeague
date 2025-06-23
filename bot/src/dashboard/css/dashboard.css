@@ -91,23 +91,23 @@ body {
   line-height: 1.2;
 }
 
-/* Wichtig: .user-rolename ohne generelle color-Deklaration */
+/* 🎨 Rollenname Styling - Unterstützt dynamische Farben */
 .user-rolename {
   font-size: 13px;
   font-weight: 500;
   line-height: 1.2;
   opacity: 1;
-  /* keine Farbe hier setzen, damit Spans sie übernehmen */
 }
 
-/* Label “Rang:” in Weiß */
+/* Standard-Fallback für Rollennamen ohne Farbe */
 .user-rolename .role-label {
   color: #ffffff;
 }
 
-/* Rollename in der gewünschten Farbe */
 .user-rolename .role-value {
-  color: #43b581;
+  color: #43b581; /* Fallback-Farbe, wird durch JavaScript überschrieben */
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* User Popup */
@@ -182,10 +182,21 @@ body {
   margin-bottom: 4px;
 }
 
+/* 🎨 Popup Rollenname Styling */
 .popup-role {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
+}
+
+.popup-role .role-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.popup-role .role-value {
+  color: #43b581; /* Fallback-Farbe, wird durch JavaScript überschrieben */
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .popup-close {
@@ -301,6 +312,17 @@ body {
   line-height: 1.6;
 }
 
+/* 🎨 Spezielle Klassen für Rollenfarben */
+.role-text-colored {
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: color 0.3s ease;
+}
+
+.role-text-colored:hover {
+  filter: brightness(1.2);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-header {
@@ -356,7 +378,7 @@ body {
   }
 
   .user-rolename {
-    font-size: 11px; /* Kleinere Schrift, behält Struktur */
+    font-size: 11px;
   }
 
   .bot-name {
@@ -370,5 +392,9 @@ body {
 
   .popup-user-info h3 {
     font-size: 18px;
+  }
+
+  .popup-role {
+    font-size: 12px;
   }
 }

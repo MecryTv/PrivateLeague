@@ -121,6 +121,22 @@
         return `${formattedDate} (${yearsDecimal} Jahre)`;
       }
 
+      // 🎨 Funktion zum Anwenden der Rollenfarbe
+      function applyRoleColor(element, color, isLabel = false) {
+        if (element && color && color !== "#99aab5") {
+          if (isLabel) {
+            // Für Labels mit "Rang:" prefix
+            element.innerHTML = `<span class="role-label">Rang:</span> <span class="role-value" style="color: ${color};">${element.textContent.replace(
+              "Rang: ",
+              ""
+            )}</span>`;
+          } else {
+            // Für direkte Rollenname-Anzeige
+            element.style.color = color;
+          }
+        }
+      }
+
       // User Popup öffnen/schließen
       function toggleUserPopup() {
         const popup = document.getElementById("user-popup");
@@ -150,8 +166,13 @@
           document.getElementById("popup-avatar").src = data.avatarUrl || "";
           document.getElementById("popup-displayname").textContent =
             data.displayName || "Unbekannt";
-          document.getElementById("popup-rolename").textContent =
+
+          // 🎨 Rollenname im Popup mit Farbe setzen
+          const popupRolename = document.getElementById("popup-rolename");
+          popupRolename.textContent =
             `Rang: ${data.roleName}` || "Rang: Unbekannt";
+          applyRoleColor(popupRolename, data.roleColor, true);
+
           document.getElementById("popup-userid").textContent =
             data.userId || "Unbekannt";
           document.getElementById("popup-username").textContent =
@@ -193,6 +214,8 @@
         if (typeof window.serverData !== "undefined") {
           const data = window.serverData;
 
+          console.log("🎨 Rollenfarbe erhalten:", data.roleColor); // Debug-Log
+
           // User Avatar setzen
           if (data.avatarUrl) {
             document.getElementById("user-avatar").src = data.avatarUrl;
@@ -204,25 +227,16 @@
               data.displayName;
           }
 
-          // Rollenname setzen
+          // 🎨 Rollenname im Header mit Farbe setzen
           if (data.roleName) {
-            document.getElementById(
-              "rolename"
-            ).textContent = `Rang: ${data.roleName}`;
-          }
-
-          // Username setzen
-          if (data.userName) {
-            document.getElementById(
-              "username"
-            ).textContent = `@${data.userName}`;
+            const roleElement = document.getElementById("rolename");
+            roleElement.textContent = `Rang: ${data.roleName}`;
+            applyRoleColor(roleElement, data.roleColor, true);
           }
 
           // User-Section klickbar machen
           document.getElementById("user-section").style.cursor = "pointer";
         } else {
-          document.getElementById("username").textContent =
-            "User nicht verfügbar";
           document.getElementById("displayname").textContent =
             "Display Name nicht verfügbar";
           document.getElementById("rolename").textContent =

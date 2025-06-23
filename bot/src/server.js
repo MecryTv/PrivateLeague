@@ -11,7 +11,6 @@ const path = require("path");
 const {
   generateSessionId,
   getDiscordAvatarUrl,
-  sendErrorPage,
   asyncHandler,
 } = require("../src/utils/dashboardUtils");
 
@@ -71,8 +70,301 @@ app.use("/img", express.static(path.join(dashboardPath, "img")));
 logger.success("📁 Statische Dateien konfiguriert");
 
 // ============================================
-// 📍 ROUTES
+// 🎨 UTILITY FUNCTIONS FÜR ROLLENFARBE
 // ============================================
+
+// Discord Farbe zu Hex konvertieren
+function discordColorToHex(discordColor) {
+  if (!discordColor || discordColor === 0) {
+    return "#99aab5"; // Discord Standard-Farbe für Rollen ohne Farbe
+  }
+  return `#${discordColor.toString(16).padStart(6, "0")}`;
+}
+
+// 🛡️ ADMIN-ROLLE MIT FARBE PRIORISIEREN
+function getRoleColorAndName(memberRoles, guildRoles) {
+  let roleColor = "#99aab5"; // Standard Discord-Farbe
+  let roleName = "Member";
+  let isAdmin = false;
+
+  // Sortiere Rollen nach Position (höchste Position = höchste Priorität)
+  const sortedRoles = memberRoles
+    .map((roleId) => guildRoles.find((r) => r.id === roleId))
+    .filter((role) => role) // Filter undefined roles
+    .sort((a, b) => b.position - a.position);
+
+  // 🎯 PRIORITÄT: Finde ALLE Admin-Rollen
+  const adminRoles = sortedRoles.filter(
+    (role) => (role.permissions & 0x8) === 0x8
+  );
+
+  if (adminRoles.length > 0) {
+    isAdmin = true;
+
+    // 🎨 DISCORD FARB-LOGIK: Höchste Admin-Rolle mit Farbe verwenden
+    let selectedAdminRole = null;
+
+    // Zuerst: Suche höchste Admin-Rolle mit Farbe
+    for (const role of adminRoles) {
+      if (role.color && role.color !== 0) {
+        selectedAdminRole = role;
+        break;
+      }
+    }
+
+    // Falls keine Admin-Rolle mit Farbe: Nehme höchste Admin-Rolle
+    if (!selectedAdminRole) {
+      selectedAdminRole = adminRoles[0]; // Höchste Admin-Rolle
+    }
+
+    // Rolle und Farbe setzen
+    roleName = selectedAdminRole.name;
+    roleColor = discordColorToHex(selectedAdminRole.color);
+  }
+
+  return { roleColor, roleName, isAdmin };
+}
+
+// ============================================
+// 🎨 LOGIN PAGE HTML GENERATOR
+// ============================================
+
+function createLoginPage(title, message, redirectUrl = null) {
+  const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${
+    process.env.CLIENT_ID
+  }&redirect_uri=${encodeURIComponent(
+    `http://localhost:${port}/api/auth/callback`
+  )}&response_type=code&scope=identify%20guilds`;
+
+  return `
+    <!DOCTYPE html>
+    <html lang="de">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title} - Private League Bot</title>
+        <link rel="icon" href="https://cdn.discordapp.com/attachments/1162553851187040329/1386455810493644890/PrivateLeague2.png?ex=6859c518&is=68587398&hm=c0fd85304a6b9494997287ce3cd3ef76a50852c070289fccba5875ce679850a6&" />
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c2f33 0%, #23272a 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+          }
+          
+          .login-container {
+            text-align: center;
+            background: #23272a;
+            padding: 50px 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid #7289da;
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #7289da 0%, #5865f2 100%);
+          }
+          
+          .bot-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #43b581;
+            margin: 0 auto 20px;
+            display: block;
+            animation: pulse 2s infinite;
+          }
+          
+          @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(67, 181, 129, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(67, 181, 129, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(67, 181, 129, 0); }
+          }
+          
+          h1 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 28px;
+            font-weight: 700;
+          }
+          
+          .subtitle {
+            color: #7289da;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 30px;
+          }
+          
+          .message {
+            background: rgba(240, 71, 71, 0.1);
+            border-left: 4px solid #f04747;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.6;
+          }
+          
+          .discord-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 20px 0;
+          }
+          
+          .discord-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4);
+            background: linear-gradient(135deg, #4752c4 0%, #3c45a5 100%);
+          }
+          
+          .discord-button:active {
+            transform: translateY(0);
+          }
+          
+          .discord-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+          }
+          
+          .info-box {
+            background: rgba(67, 181, 129, 0.1);
+            border: 1px solid #43b581;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+          }
+          
+          .info-title {
+            color: #43b581;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          
+          .info-text {
+            color: #b9bbbe;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+          
+          .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #36393f;
+            color: #72767d;
+            font-size: 14px;
+          }
+          
+          @media (max-width: 768px) {
+            .login-container {
+              padding: 30px 25px;
+              margin: 10px;
+            }
+            
+            h1 {
+              font-size: 24px;
+            }
+            
+            .subtitle {
+              font-size: 16px;
+            }
+            
+            .discord-button {
+              font-size: 16px;
+              padding: 12px 25px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="login-container">
+          <img src="https://cdn.discordapp.com/attachments/1162553851187040329/1386455810493644890/PrivateLeague2.png?ex=6859c518&is=68587398&hm=c0fd85304a6b9494997287ce3cd3ef76a50852c070289fccba5875ce679850a6&" alt="Bot Logo" class="bot-logo">
+          
+          <h1>Private League Bot</h1>
+          <div class="subtitle">Dashboard Login</div>
+          
+          <div class="message">
+            <strong>🔒 ${title}</strong><br>
+            ${message}
+          </div>
+          
+          <a href="${discordAuthUrl}" class="discord-button">
+            <svg class="discord-icon" viewBox="0 0 24 24">
+              <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0188 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/>
+            </svg>
+            Mit Discord anmelden
+          </a>
+          
+          <div class="info-box">
+            <div class="info-title">
+              ℹ️ Hinweis
+            </div>
+            <div class="info-text">
+              Du benötigst Administrator-Rechte auf dem Discord Server, um Zugriff auf das Dashboard zu erhalten. Nach der Anmeldung wirst du automatisch weitergeleitet.
+            </div>
+          </div>
+          
+          <div class="footer">
+            Private League Bot Dashboard © 2024
+          </div>
+        </div>
+        
+        ${
+          redirectUrl
+            ? `
+        <script>
+          // Optional: Automatische Weiterleitung nach Login
+          setTimeout(() => {
+            if (window.location.href.includes('${redirectUrl}')) {
+              window.location.reload();
+            }
+          }, 1000);
+        </script>
+        `
+            : ""
+        }
+      </body>
+    </html>
+  `;
+}
 
 // 🎯 ROOT REDIRECT - Automatische Weiterleitung von / zu Dashboard
 app.get("/", (req, res) => {
@@ -88,14 +380,7 @@ app.get("/css/dashboard.css", (req, res, next) => {
       res.sendFile(cssFile);
     } else {
       logger.error("❌ CSS Datei nicht gefunden:", cssFile);
-      return sendErrorPage(
-        res,
-        404,
-        "CSS Datei nicht gefunden",
-        "Die angeforderte CSS-Datei konnte nicht gefunden werden. Dies könnte bedeuten, dass die Dashboard-Dateien nicht korrekt installiert sind.",
-        `Datei-Pfad: ${cssFile}`,
-        `IP: ${req.ip}`
-      );
+      res.status(404).send("CSS Datei nicht gefunden");
     }
   } catch (error) {
     next(error);
@@ -122,14 +407,7 @@ app.get(
       logger.success("✅ Dashboard HTML erfolgreich gesendet");
     } catch (error) {
       logger.error("❌ Fehler beim Laden der Dashboard HTML:", error.message);
-      return sendErrorPage(
-        res,
-        500,
-        "Dashboard konnte nicht geladen werden",
-        "Die Dashboard-HTML-Datei konnte nicht geladen werden. Möglicherweise sind die Dashboard-Dateien beschädigt oder nicht vorhanden.",
-        error.message,
-        `IP: ${req.ip} | User-Agent: ${req.get("User-Agent")}`
-      );
+      res.status(500).send("Dashboard konnte nicht geladen werden");
     }
   })
 );
@@ -142,14 +420,9 @@ app.get(
 
     if (!code) {
       logger.error("❌ OAuth Callback ohne Code Parameter");
-      return sendErrorPage(
-        res,
-        400,
-        "OAuth Authentifizierung fehlgeschlagen",
-        "Der Discord OAuth Callback wurde ohne den erforderlichen Code-Parameter aufgerufen. Dies deutet auf ein Problem mit der Discord-Authentifizierung hin.",
-        "Missing code parameter in OAuth callback",
-        `IP: ${req.ip}`
-      );
+      return res
+        .status(400)
+        .send("OAuth Authentifizierung fehlgeschlagen - Code Parameter fehlt");
     }
 
     const formData = new URLSearchParams({
@@ -200,18 +473,19 @@ app.get(
         logger.warn(
           `⚠️ User nicht in erlaubter Guild: ${userResponse.data.username}`
         );
-        return sendErrorPage(
-          res,
-          403,
-          "Zugriff verweigert - Nicht im Server",
-          "Du bist nicht Mitglied des erforderlichen Discord Servers. Um Zugriff auf das Dashboard zu erhalten, musst du dem Discord Server beitreten.",
-          `Required Guild ID: ${ALLOWED_GUILD_ID}`,
-          `User: ${userResponse.data.username} (${userResponse.data.id})`
+
+        const loginPage = createLoginPage(
+          "Zugriff verweigert",
+          "Du bist nicht Mitglied des erforderlichen Discord Servers. Bitte tritt dem Server bei und melde dich dann erneut an."
         );
+
+        return res.status(403).send(loginPage);
       }
 
-      // 🛡️ ADMINISTRATOR-RECHTE ÜBERPRÜFUNG
-      logger.debug("🛡️ Administrator-Rechte werden überprüft");
+      // 🛡️ ADMINISTRATOR-RECHTE ÜBERPRÜFUNG MIT ADMIN-ROLLENFARBE
+      logger.debug(
+        "🛡️ Administrator-Rechte und Admin-Rollenfarbe werden überprüft"
+      );
       try {
         const memberResponse = await rest.get(
           Routes.guildMember(ALLOWED_GUILD_ID, userResponse.data.id)
@@ -222,39 +496,34 @@ app.get(
         );
 
         const memberRoles = memberResponse.roles;
-        let isAdmin = false;
-        let adminRoleName = "Member";
 
         const [guildInfo, guildRoles] = await Promise.all([
           rest.get(Routes.guild(ALLOWED_GUILD_ID)),
           rest.get(Routes.guildRoles(ALLOWED_GUILD_ID)),
         ]);
 
-        for (const roleId of memberRoles) {
-          const role = guildRoles.find((r) => r.id === roleId);
-          if (role && (role.permissions & 0x8) === 0x8) {
-            isAdmin = true;
-            adminRoleName = role.name;
-            logger.success(
-              `🛡️ User hat Administrator-Rechte: ${userResponse.data.username} (Rolle: ${role.name})`
-            );
-            break;
-          }
-        }
+        // 🎯 ADMIN-ROLLE PRIORISIEREN: Immer Admin-Rolle mit ihrer Farbe verwenden
+        const { roleColor, roleName, isAdmin } = getRoleColorAndName(
+          memberRoles,
+          guildRoles
+        );
 
         if (!isAdmin) {
           logger.warn(
             `🚫 User hat keine Administrator-Rechte: ${userResponse.data.username}`
           );
-          return sendErrorPage(
-            res,
-            403,
+
+          const loginPage = createLoginPage(
             "Administrator-Rechte erforderlich",
-            "Du hast nicht die erforderlichen Administrator-Berechtigungen, um auf dieses Dashboard zuzugreifen. Nur Benutzer mit Administrator-Rolle können das Dashboard verwenden.",
-            "User does not have administrator permissions",
-            `User: ${userResponse.data.username} (${userResponse.data.id}) | Guild: ${ALLOWED_GUILD_ID}`
+            "Du hast nicht die erforderlichen Administrator-Berechtigungen für dieses Dashboard. Nur Benutzer mit Administrator-Rolle können darauf zugreifen."
           );
+
+          return res.status(403).send(loginPage);
         }
+
+        logger.success(
+          `🛡️ Admin-User authentifiziert: ${userResponse.data.username} (Admin-Rolle: ${roleName}, Farbe: ${roleColor})`
+        );
 
         // SESSION ERSTELLEN NACH ERFOLGREICHEM ADMIN-CHECK
         const sessionId = generateSessionId();
@@ -274,7 +543,8 @@ app.get(
           guildName: guildInfo.name,
           guildId: ALLOWED_GUILD_ID,
           isAdmin: true,
-          roleName: adminRoleName,
+          roleName: roleName,
+          roleColor: roleColor, // 🎨 Admin-Rollenfarbe (oder Standard wenn keine Farbe)
           accountCreated: userData.id,
           createdAt: Date.now(),
         });
@@ -284,7 +554,7 @@ app.get(
         });
 
         logger.user(
-          `🎉 Administrator erfolgreich authentifiziert: ${displayName} (@${username}) - Rolle: ${adminRoleName}`
+          `🎉 Administrator erfolgreich authentifiziert: ${displayName} (@${username}) - Admin-Rolle: ${roleName} (${roleColor})`
         );
         res.redirect(`/admin/discord/${ALLOWED_GUILD_ID}`);
       } catch (memberError) {
@@ -292,43 +562,20 @@ app.get(
           "❌ Fehler beim Abrufen der Member-Daten:",
           memberError.message
         );
-        return sendErrorPage(
-          res,
-          500,
-          "Berechtigungsprüfung fehlgeschlagen",
-          "Es gab einen Fehler beim Überprüfen deiner Discord-Berechtigungen. Dies könnte ein temporäres Problem mit der Discord API sein.",
-          memberError.message,
-          `User: ${
-            userResponse.data?.username || "Unknown"
-          } | Guild: ${ALLOWED_GUILD_ID}`
-        );
+        return res.status(500).send("Berechtigungsprüfung fehlgeschlagen");
       }
     } catch (error) {
       logger.error("❌ OAuth Fehler:", error.message);
 
-      let errorMessage =
-        "Es gab einen unerwarteten Fehler bei der Discord-Authentifizierung.";
-      let technicalDetails = error.message;
+      let errorMessage = "Discord Authentifizierung fehlgeschlagen";
 
       if (error.code === "ECONNABORTED") {
-        errorMessage =
-          "Die Verbindung zu Discord ist zeitüberschritten. Bitte versuche es erneut.";
+        errorMessage = "Verbindung zu Discord zeitüberschritten";
       } else if (error.response) {
-        errorMessage =
-          "Discord hat die Authentifizierung abgelehnt. Möglicherweise ist der Autorisierungscode ungültig oder abgelaufen.";
-        technicalDetails = `HTTP ${error.response.status}: ${
-          error.response.data?.error || error.message
-        }`;
+        errorMessage = "Discord hat die Authentifizierung abgelehnt";
       }
 
-      return sendErrorPage(
-        res,
-        500,
-        "Discord Authentifizierung fehlgeschlagen",
-        errorMessage,
-        technicalDetails,
-        `IP: ${req.ip} | Code: ${code ? "Present" : "Missing"}`
-      );
+      return res.status(500).send(errorMessage);
     }
   })
 );
@@ -340,28 +587,24 @@ app.get("/admin/discord/:guildId", (req, res, next) => {
 
     if (guildId !== ALLOWED_GUILD_ID) {
       logger.warn(`⚠️ Ungültige Guild ID angefordert: ${guildId}`);
-      return sendErrorPage(
-        res,
-        403,
-        "Ungültige Guild ID",
-        "Die angeforderte Guild ID ist nicht erlaubt. Du kannst nur auf das Dashboard der autorisierten Guild zugreifen.",
-        `Requested Guild ID: ${guildId} | Allowed: ${ALLOWED_GUILD_ID}`,
-        `IP: ${req.ip}`
+
+      const loginPage = createLoginPage(
+        "Ungültige Server-ID",
+        "Die angeforderte Server-ID ist nicht erlaubt. Du kannst nur auf das Dashboard des autorisierten Discord Servers zugreifen."
       );
+
+      return res.status(403).send(loginPage);
     }
 
     if (!sessionId || !userSessions.has(sessionId)) {
       logger.warn("⚠️ Dashboard-Zugriff ohne gültige Session");
-      return sendErrorPage(
-        res,
-        401,
-        "Authentifizierung erforderlich",
-        "Du bist nicht angemeldet oder deine Session ist abgelaufen. Bitte melde dich über Discord an, um auf das Dashboard zuzugreifen.",
-        "No valid session found",
-        `IP: ${req.ip} | Session ID: ${
-          sessionId ? "Present but invalid" : "Missing"
-        }`
+
+      const loginPage = createLoginPage(
+        "Session abgelaufen",
+        "Deine Anmeldung ist abgelaufen oder ungültig. Bitte melde dich erneut mit Discord an, um auf das Dashboard zuzugreifen."
       );
+
+      return res.status(401).send(loginPage);
     }
 
     const sessionData = userSessions.get(sessionId);
@@ -390,12 +633,15 @@ app.get("/admin/discord/:guildId", (req, res, next) => {
           avatarUrl: "${sessionData.avatarUrl}",
           isAdmin: ${sessionData.isAdmin || false},
           roleName: "${sessionData.roleName || "Member"}",
+          roleColor: "${sessionData.roleColor || "#99aab5"}", 
           accountCreated: "${sessionData.accountCreated || sessionData.userId}"
         };`
     );
 
     res.send(dashboardHtml);
-    logger.user(`📊 Dashboard geladen für: ${sessionData.displayName}`);
+    logger.user(
+      `📊 Dashboard geladen für: ${sessionData.displayName} (Admin-Rolle: ${sessionData.roleName}, Farbe: ${sessionData.roleColor})`
+    );
   } catch (error) {
     next(error);
   }
@@ -414,6 +660,20 @@ app.get("/admin", (req, res) => {
   res.redirect(`/admin/discord/${ALLOWED_GUILD_ID}`);
 });
 
+// 🚪 LOGOUT ROUTE
+app.post("/api/logout", (req, res) => {
+  const sessionId = req.cookies.dashboard_session;
+
+  if (sessionId && userSessions.has(sessionId)) {
+    const sessionData = userSessions.get(sessionId);
+    userSessions.delete(sessionId);
+    logger.user(`👋 User abgemeldet: ${sessionData.displayName}`);
+  }
+
+  res.clearCookie("dashboard_session");
+  res.status(200).json({ message: "Successfully logged out" });
+});
+
 // ============================================
 // 🚨 ERROR HANDLING MIDDLEWARE
 // ============================================
@@ -421,14 +681,7 @@ app.get("/admin", (req, res) => {
 // 404 Handler - Muss vor dem globalen Error Handler stehen
 app.use((req, res, next) => {
   logger.warn(`404 - Seite nicht gefunden: ${req.method} ${req.url}`);
-  sendErrorPage(
-    res,
-    404,
-    "Seite nicht gefunden",
-    "Die angeforderte Seite existiert nicht. Überprüfe die URL oder kehre zur Startseite zurück.",
-    `URL: ${req.method} ${req.url}`,
-    `IP: ${req.ip} | User-Agent: ${req.get("User-Agent")}`
-  );
+  res.status(404).send("Seite nicht gefunden");
 });
 
 // Globaler Error Handler - Muss als letztes Middleware definiert werden
@@ -450,17 +703,8 @@ app.use((error, req, res, next) => {
   // Log für Debugging
   logger.error("Error Details:", JSON.stringify(errorDetails, null, 2));
 
-  // Fehlerseite senden
-  sendErrorPage(
-    res,
-    500,
-    "Interner Server-Fehler",
-    "Es ist ein unerwarteter Server-Fehler aufgetreten. Das Entwicklungsteam wurde automatisch benachrichtigt.",
-    `${error.name}: ${error.message}`,
-    `IP: ${req.ip} | Session: ${
-      req.cookies?.dashboard_session ? "Active" : "None"
-    } | URL: ${req.method} ${req.url}`
-  );
+  // Einfache Fehlerantwort senden
+  res.status(500).send("Interner Server-Fehler");
 });
 
 // ============================================
@@ -474,6 +718,7 @@ app.listen(port, () => {
   logger.info("Error Handling System aktiviert");
   logger.info("Sessions werden alle 30 Minuten bereinigt");
   logger.info(`Root-Redirect aktiv: / → /admin/discord/${ALLOWED_GUILD_ID}`);
+  logger.info("🎨 Admin-Rollenfarben-System aktiviert");
 });
 
 // Graceful Shutdown Handler
