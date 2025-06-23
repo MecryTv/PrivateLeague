@@ -5,12 +5,29 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow: hidden; /* 🚫 HTML Scrollbar entfernt */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #2c2f33 0%, #23272a 100%);
   color: #fff;
   min-height: 100vh;
   line-height: 1.6;
+  overflow: hidden; /* 🚫 Body Scrollbar entfernt */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 /* Header ganz oben, volle Breite */
@@ -282,13 +299,154 @@ body {
   transform: translateY(0);
 }
 
-/* Main Content Area */
+/* ===============================
+   SIDEBAR STYLES
+   =============================== */
+
+/* Main Container für Layout */
+.main-container {
+  display: flex;
+  min-height: calc(100vh - 80px); /* Header-Höhe abziehen */
+  overflow: hidden; /* 🚫 Container Scrollbar entfernt */
+}
+
+/* Mobile Navigation Toggle */
+.mobile-nav-toggle {
+  display: none; /* Standardmäßig versteckt */
+  position: fixed;
+  top: 100px;
+  left: 20px;
+  z-index: 1002;
+  background: #7289da;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(114, 137, 218, 0.4);
+  transition: all 0.3s ease;
+}
+
+.mobile-nav-toggle:hover {
+  background: #5865f2;
+  transform: scale(1.1);
+}
+
+/* Linke Sidebar */
+.sidebar-left {
+  width: 260px;
+  background: linear-gradient(135deg, #2c2f33 0%, #23272a 100%);
+  border-right: 1px solid #36393f;
+  position: sticky;
+  top: 80px; /* Header-Höhe */
+  height: calc(100vh - 80px);
+  overflow: hidden; /* 🚫 Sidebar Scrollbar entfernt */
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+
+.sidebar-left::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Navigation */
+.sidebar-nav {
+  padding: 20px 0;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Navigation Items */
+.nav-item {
+  margin: 0;
+  position: relative;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 25px;
+  color: #b9bbbe;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  background-color: rgba(114, 137, 218, 0.1);
+  color: #ffffff;
+  border-left-color: #7289da;
+  transform: translateX(2px);
+}
+
+/* Active State */
+.nav-item.active .nav-link {
+  background-color: rgba(114, 137, 218, 0.15);
+  color: #ffffff;
+  border-left-color: #7289da;
+  font-weight: 600;
+}
+
+.nav-item.active .nav-link i {
+  color: #7289da;
+  transform: scale(1.1);
+}
+
+/* Icons */
+.nav-link i {
+  width: 20px;
+  font-size: 18px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+/* Hover Animation für Icons */
+.nav-link:hover i {
+  transform: scale(1.1);
+  color: #7289da;
+}
+
+/* Main Content Area - 🚫 SCROLLBAR KOMPLETT ENTFERNT */
 .dashboard-content {
   flex: 1;
   padding: 30px;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+  max-width: none;
+  margin: 0;
+  width: auto;
+  background: linear-gradient(135deg, #2c2f33 0%, #23272a 100%);
+  overflow: hidden; /* 🚫 Scrollbar komplett entfernt */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+  height: calc(100vh - 80px); /* Maximale Höhe */
+}
+
+/* 🚫 ALLE SCROLLBARS FÜR CONTENT VERSTECKEN */
+.dashboard-content::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari und Opera */
 }
 
 .content-wrapper {
@@ -297,6 +455,14 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
+  height: calc(100vh - 140px); /* Maximale Höhe ohne Overflow */
+  overflow: hidden; /* 🚫 Kein Scroll im Content */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+
+.content-wrapper::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
 }
 
 .content-wrapper h2 {
@@ -323,7 +489,78 @@ body {
   filter: brightness(1.2);
 }
 
-/* Responsive Design */
+/* 📊 CONTENT SECTION STYLING */
+.content-section {
+  display: none; /* Alle Sections standardmäßig versteckt */
+  animation: fadeIn 0.3s ease-in-out;
+  overflow: hidden; /* 🚫 Section Scrollbar entfernt */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+  height: 100%; /* Volle Höhe */
+}
+
+.content-section::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+}
+
+.content-section.active {
+  display: block; /* Nur aktive Section anzeigen */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 📊 SPEZIFISCHE SECTION STYLES */
+.dashboard-section {
+  /* Dashboard-spezifische Styles */
+  overflow: hidden;
+}
+
+.server-settings-section {
+  /* Server Einstellungen-spezifische Styles */
+  overflow: hidden;
+}
+
+.moderation-section {
+  /* Moderation-spezifische Styles */
+  overflow: hidden;
+}
+
+/* 🚫 GLOBALE SCROLLBAR ENTFERNUNG */
+* {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE */
+}
+
+*::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+   =============================== */
+
+/* Tablet Design */
+@media (max-width: 1024px) {
+  .sidebar-left {
+    width: 220px;
+  }
+
+  .nav-link {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Mobile Design */
 @media (max-width: 768px) {
   .main-header {
     padding: 12px 20px;
@@ -345,12 +582,45 @@ body {
     font-size: 16px;
   }
 
+  /* Mobile Navigation Toggle anzeigen */
+  .mobile-nav-toggle {
+    display: block;
+  }
+
+  /* Mobile Sidebar - Transform zu Overlay */
+  .main-container {
+    flex-direction: column;
+    overflow: hidden; /* 🚫 Mobile Container Scrollbar entfernt */
+  }
+
+  .sidebar-left {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    width: 260px;
+    height: 100vh;
+    z-index: 1001;
+    transition: transform 0.3s ease;
+    transform: translateX(0);
+    overflow: hidden; /* 🚫 Mobile Sidebar Scrollbar entfernt */
+  }
+
+  .sidebar-left.sidebar-open {
+    transform: translateX(260px);
+  }
+
   .dashboard-content {
     padding: 20px;
+    margin-left: 0;
+    width: 100%;
+    height: calc(100vh - 120px); /* Mobile angepasst */
+    overflow: hidden; /* 🚫 Mobile Content Scrollbar entfernt */
   }
 
   .content-wrapper {
     padding: 20px;
+    height: calc(100vh - 120px); /* Mobile angepasst */
+    overflow: hidden; /* 🚫 Mobile Content-Wrapper Scrollbar entfernt */
   }
 
   /* Popup responsive */
@@ -362,6 +632,7 @@ body {
   }
 }
 
+/* Kleine Mobile Geräte */
 @media (max-width: 480px) {
   .user-avatar {
     width: 35px;
@@ -396,5 +667,44 @@ body {
 
   .popup-role {
     font-size: 12px;
+  }
+
+  /* Vollbreite Sidebar auf sehr kleinen Bildschirmen */
+  .sidebar-left {
+    width: 100vw;
+    left: -100vw;
+    overflow: hidden; /* 🚫 Kleine Mobile Sidebar Scrollbar entfernt */
+  }
+
+  .sidebar-left.sidebar-open {
+    transform: translateX(100vw);
+  }
+
+  .nav-link {
+    padding: 15px 25px;
+    font-size: 16px;
+  }
+
+  .mobile-nav-toggle {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+
+  .content-wrapper {
+    height: calc(100vh - 100px); /* Noch kompakter für kleine Geräte */
+    overflow: hidden; /* 🚫 Kleine Mobile Content-Wrapper Scrollbar entfernt */
+  }
+
+  .dashboard-content {
+    height: calc(100vh - 100px); /* Kleine Mobile angepasst */
+    overflow: hidden; /* 🚫 Kleine Mobile Content Scrollbar entfernt */
+  }
+}
+
+/* Desktop nur - Verstecke Mobile Toggle */
+@media (min-width: 769px) {
+  .mobile-nav-toggle {
+    display: none !important;
   }
 }

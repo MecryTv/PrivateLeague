@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Discord Bot</title>
     <link rel="stylesheet" href="../css/dashboard.css" />
+    <!-- FontAwesome CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <link
       rel="icon"
       href="https://cdn.discordapp.com/attachments/1162553851187040329/1386455810493644890/PrivateLeague2.png?ex=6859c518&is=68587398&hm=c0fd85304a6b9494997287ce3cd3ef76a50852c070289fccba5875ce679850a6&"
@@ -85,16 +90,240 @@
       onclick="closeUserPopup()"
     ></div>
 
-    <!-- Main Content Area -->
-    <main class="dashboard-content">
-      <div class="content-wrapper">
-        <!-- Hier kommt der Rest Ihres Dashboard-Inhalts -->
-        <h2>Dashboard</h2>
-        <p>Willkommen im Private League Bot Dashboard!</p>
+    <!-- Mobile Navigation Toggle -->
+    <button class="mobile-nav-toggle" onclick="toggleMobileSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Container für Sidebar und Content -->
+    <div class="main-container">
+      <!-- Linke Sidebar -->
+      <div class="sidebar-left" id="sidebar">
+        <nav class="sidebar-nav">
+          <ul>
+            <li class="nav-item" data-section="dashboard">
+              <div class="nav-link" onclick="navigateToSection('dashboard')">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+              </div>
+            </li>
+            <li class="nav-item" data-section="server-einstellungen">
+              <div
+                class="nav-link"
+                onclick="navigateToSection('server-einstellungen')"
+              >
+                <i class="fas fa-cog"></i>
+                <span>Server Einstellungen</span>
+              </div>
+            </li>
+            <li class="nav-item" data-section="moderation">
+              <div class="nav-link" onclick="navigateToSection('moderation')">
+                <i class="fas fa-shield-alt"></i>
+                <span>Moderation</span>
+              </div>
+            </li>
+          </ul>
+        </nav>
       </div>
-    </main>
+
+      <!-- Main Content Area -->
+      <main class="dashboard-content">
+        <div class="content-wrapper">
+          <!-- 📊 DASHBOARD SECTION -->
+          <div
+            id="dashboard-content"
+            class="content-section dashboard-section active"
+          >
+            <h2>📊 Dashboard</h2>
+            <p>Willkommen im Private League Bot Dashboard!</p>
+            <br />
+            <div
+              style="
+                background: rgba(67, 181, 129, 0.1);
+                border: 1px solid #43b581;
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+              "
+            >
+              <h3 style="color: #43b581; margin-bottom: 10px">
+                <i class="fas fa-chart-line"></i> Server Statistiken
+              </h3>
+              <p style="color: #b9bbbe">
+                Hier könnten Server-Statistiken, aktive Benutzer und Bot-Status
+                angezeigt werden.
+              </p>
+            </div>
+          </div>
+
+          <!-- ⚙️ SERVER EINSTELLUNGEN SECTION -->
+          <div
+            id="server-einstellungen-content"
+            class="content-section server-settings-section"
+          >
+            <h2>⚙️ Server Einstellungen</h2>
+            <p>
+              Hier können Sie die Einstellungen Ihres Discord Servers verwalten.
+            </p>
+            <br />
+            <div
+              style="
+                background: rgba(114, 137, 218, 0.1);
+                border: 1px solid #7289da;
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+              "
+            >
+              <h3 style="color: #7289da; margin-bottom: 10px">
+                <i class="fas fa-server"></i> Server Konfiguration
+              </h3>
+              <p style="color: #b9bbbe">
+                Verwalten Sie Kanäle, Rollen, Berechtigungen und andere
+                Servereinstellungen.
+              </p>
+              <br />
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                  gap: 15px;
+                  margin-top: 15px;
+                "
+              >
+                <div
+                  style="
+                    background: rgba(35, 39, 42, 0.8);
+                    padding: 15px;
+                    border-radius: 8px;
+                  "
+                >
+                  <h4 style="color: #ffffff; margin-bottom: 8px">
+                    <i class="fas fa-hashtag"></i> Kanäle
+                  </h4>
+                  <p style="color: #b9bbbe; font-size: 14px">
+                    Text- und Sprachkanäle verwalten
+                  </p>
+                </div>
+                <div
+                  style="
+                    background: rgba(35, 39, 42, 0.8);
+                    padding: 15px;
+                    border-radius: 8px;
+                  "
+                >
+                  <h4 style="color: #ffffff; margin-bottom: 8px">
+                    <i class="fas fa-users-cog"></i> Rollen
+                  </h4>
+                  <p style="color: #b9bbbe; font-size: 14px">
+                    Rollen und Berechtigungen konfigurieren
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 🛡️ MODERATION SECTION -->
+          <div
+            id="moderation-content"
+            class="content-section moderation-section"
+          >
+            <h2>🛡️ Moderation</h2>
+            <p>Moderationstools und -einstellungen für Ihren Discord Server.</p>
+            <br />
+            <div
+              style="
+                background: rgba(240, 71, 71, 0.1);
+                border: 1px solid #f04747;
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+              "
+            >
+              <h3 style="color: #f04747; margin-bottom: 10px">
+                <i class="fas fa-gavel"></i> Moderationstools
+              </h3>
+              <p style="color: #b9bbbe">
+                Verwalten Sie Warnungen, Sperren, Mute-Funktionen und
+                Automoderation.
+              </p>
+              <br />
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                  gap: 15px;
+                  margin-top: 15px;
+                "
+              >
+                <div
+                  style="
+                    background: rgba(35, 39, 42, 0.8);
+                    padding: 15px;
+                    border-radius: 8px;
+                  "
+                >
+                  <h4 style="color: #ffffff; margin-bottom: 8px">
+                    <i class="fas fa-exclamation-triangle"></i> Warnungen
+                  </h4>
+                  <p style="color: #b9bbbe; font-size: 14px">
+                    Benutzer-Warnungen verwalten
+                  </p>
+                </div>
+                <div
+                  style="
+                    background: rgba(35, 39, 42, 0.8);
+                    padding: 15px;
+                    border-radius: 8px;
+                  "
+                >
+                  <h4 style="color: #ffffff; margin-bottom: 8px">
+                    <i class="fas fa-ban"></i> Sperren
+                  </h4>
+                  <p style="color: #b9bbbe; font-size: 14px">
+                    Temporary und permanente Sperren
+                  </p>
+                </div>
+                <div
+                  style="
+                    background: rgba(35, 39, 42, 0.8);
+                    padding: 15px;
+                    border-radius: 8px;
+                  "
+                >
+                  <h4 style="color: #ffffff; margin-bottom: 8px">
+                    <i class="fas fa-volume-mute"></i> Mute
+                  </h4>
+                  <p style="color: #b9bbbe; font-size: 14px">
+                    Benutzer temporär stumm schalten
+                  </p>
+                </div>
+                <div
+                  style="
+                    background: rgba(35, 39, 42, 0.8);
+                    padding: 15px;
+                    border-radius: 8px;
+                  "
+                >
+                  <h4 style="color: #ffffff; margin-bottom: 8px">
+                    <i class="fas fa-robot"></i> Automod
+                  </h4>
+                  <p style="color: #b9bbbe; font-size: 14px">
+                    Automatische Moderation konfigurieren
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
 
     <script>
+      // 📊 GLOBALE VARIABLEN
+      let currentGuildId = "";
+      let currentSection = "dashboard";
+
       // Discord Snowflake zu Datum konvertieren
       function snowflakeToDate(snowflake) {
         const timestamp = (BigInt(snowflake) >> 22n) + 1420070400000n;
@@ -136,6 +365,91 @@
           }
         }
       }
+
+      // 📊 NAVIGATION FUNCTIONS
+      function navigateToSection(section) {
+        if (!currentGuildId) {
+          console.error("Guild ID not available");
+          return;
+        }
+
+        // URL aktualisieren
+        const newUrl = `/admin/discord/${currentGuildId}/${section}`;
+        window.history.pushState({ section: section }, "", newUrl);
+
+        // Section wechseln
+        showSection(section);
+
+        // Mobile Sidebar schließen
+        closeMobileSidebarOnClick();
+      }
+
+      function showSection(section) {
+        // Alle Sections verstecken
+        const allSections = document.querySelectorAll(".content-section");
+        allSections.forEach((sec) => sec.classList.remove("active"));
+
+        // Aktive Section anzeigen
+        const targetSection = document.getElementById(`${section}-content`);
+        if (targetSection) {
+          targetSection.classList.add("active");
+        }
+
+        // Navigation aktiven Status aktualisieren
+        updateActiveNavItem(section);
+
+        // Aktualisiere globale Variable
+        currentSection = section;
+
+        console.log(`📊 Section gewechselt zu: ${section}`);
+      }
+
+      function updateActiveNavItem(section) {
+        // Alle nav-items inactive setzen
+        const navItems = document.querySelectorAll(".nav-item");
+        navItems.forEach((item) => item.classList.remove("active"));
+
+        // Entsprechende nav-item aktivieren
+        const activeItem = document.querySelector(
+          `[data-section="${section}"]`
+        );
+        if (activeItem) {
+          activeItem.classList.add("active");
+        }
+      }
+
+      // 📊 URL MANAGEMENT
+      function initializeFromURL() {
+        const pathParts = window.location.pathname.split("/");
+
+        // Erwarte: /admin/discord/{guildId}/{section?}
+        if (pathParts.length >= 4) {
+          currentGuildId = pathParts[3];
+
+          if (pathParts.length >= 5 && pathParts[4]) {
+            const urlSection = pathParts[4];
+            currentSection = urlSection;
+            showSection(urlSection);
+          } else {
+            // Kein Section Parameter -> Default zu Dashboard
+            currentSection = "dashboard";
+            showSection("dashboard");
+            // URL ohne Refresh aktualisieren
+            const newUrl = `/admin/discord/${currentGuildId}/dashboard`;
+            window.history.replaceState({ section: "dashboard" }, "", newUrl);
+          }
+        }
+      }
+
+      // Browser Back/Forward Button Support
+      window.addEventListener("popstate", function (event) {
+        if (event.state && event.state.section) {
+          showSection(event.state.section);
+        } else {
+          // Fallback
+          initializeFromURL();
+        }
+      });
 
       // User Popup öffnen/schließen
       function toggleUserPopup() {
@@ -216,6 +530,14 @@
 
           console.log("🎨 Rollenfarbe erhalten:", data.roleColor); // Debug-Log
 
+          // Guild ID setzen
+          currentGuildId = data.guildId;
+
+          // Current Section aus Server Data lesen (falls verfügbar)
+          if (data.currentSection) {
+            currentSection = data.currentSection;
+          }
+
           // User Avatar setzen
           if (data.avatarUrl) {
             document.getElementById("user-avatar").src = data.avatarUrl;
@@ -248,6 +570,33 @@
         }
       }
 
+      // Mobile Sidebar Toggle
+      function toggleMobileSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const toggleBtn = document.querySelector(".mobile-nav-toggle");
+
+        sidebar.classList.toggle("sidebar-open");
+
+        // Icon ändern
+        const icon = toggleBtn.querySelector("i");
+        if (sidebar.classList.contains("sidebar-open")) {
+          icon.className = "fas fa-times";
+        } else {
+          icon.className = "fas fa-bars";
+        }
+      }
+
+      // Sidebar schließen bei Link-Klick auf Mobile
+      function closeMobileSidebarOnClick() {
+        if (window.innerWidth <= 768) {
+          const sidebar = document.getElementById("sidebar");
+          const toggleBtn = document.querySelector(".mobile-nav-toggle");
+
+          sidebar.classList.remove("sidebar-open");
+          toggleBtn.querySelector("i").className = "fas fa-bars";
+        }
+      }
+
       // ESC-Taste schließt Popup
       document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
@@ -255,7 +604,20 @@
         }
       });
 
-      document.addEventListener("DOMContentLoaded", updateDashboard);
+      // 📊 INITIALIZATION
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("📊 Dashboard wird initialisiert...");
+
+        // Server-Daten laden
+        updateDashboard();
+
+        // URL-basierte Navigation initialisieren
+        initializeFromURL();
+
+        console.log(
+          `📊 Dashboard initialisiert - Section: ${currentSection}, Guild: ${currentGuildId}`
+        );
+      });
     </script>
   </body>
 </html>

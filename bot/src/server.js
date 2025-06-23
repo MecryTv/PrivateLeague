@@ -366,6 +366,83 @@ function createLoginPage(title, message, redirectUrl = null) {
   `;
 }
 
+// ============================================
+// 🎯 DASHBOARD HANDLER FUNCTION
+// ============================================
+
+function handleDashboardRequest(req, res, next) {
+  try {
+    const { guildId, section } = req.params;
+    const sessionId = req.cookies.dashboard_session;
+
+    if (guildId !== ALLOWED_GUILD_ID) {
+      logger.warn(`⚠️ Ungültige Guild ID angefordert: ${guildId}`);
+
+      const loginPage = createLoginPage(
+        "Ungültige Server-ID",
+        "Die angeforderte Server-ID ist nicht erlaubt. Du kannst nur auf das Dashboard des autorisierten Discord Servers zugreifen."
+      );
+
+      return res.status(403).send(loginPage);
+    }
+
+    if (!sessionId || !userSessions.has(sessionId)) {
+      logger.warn("⚠️ Dashboard-Zugriff ohne gültige Session");
+
+      const loginPage = createLoginPage(
+        "Session abgelaufen",
+        "Deine Anmeldung ist abgelaufen oder ungültig. Bitte melde dich erneut mit Discord an, um auf das Dashboard zuzugreifen."
+      );
+
+      return res.status(401).send(loginPage);
+    }
+
+    const sessionData = userSessions.get(sessionId);
+    const dashboardFile = path.join(dashboardPath, "html", "dashboard.html");
+
+    if (!fs.existsSync(dashboardFile)) {
+      throw new Error(`Dashboard-Datei nicht gefunden: ${dashboardFile}`);
+    }
+
+    let dashboardHtml = fs.readFileSync(dashboardFile, "utf8");
+
+    dashboardHtml = dashboardHtml.replace(
+      'href="../css/dashboard.css"',
+      'href="/css/dashboard.css"'
+    );
+
+    // 📊 CURRENT SECTION FÜR FRONTEND
+    const currentSection = section || "dashboard";
+
+    dashboardHtml = dashboardHtml.replace(
+      "<script>",
+      `<script>
+        window.serverData = {
+          guildName: "${sessionData.guildName}",
+          guildId: "${sessionData.guildId}",
+          userId: "${sessionData.userId}",
+          userName: "${sessionData.username}",
+          displayName: "${sessionData.displayName}",
+          avatarUrl: "${sessionData.avatarUrl}",
+          isAdmin: ${sessionData.isAdmin || false},
+          roleName: "${sessionData.roleName || "Member"}",
+          roleColor: "${sessionData.roleColor || "#99aab5"}", 
+          accountCreated: "${sessionData.accountCreated || sessionData.userId}",
+          currentSection: "${currentSection}"
+        };`
+    );
+
+    res.send(dashboardHtml);
+    logger.user(
+      `📊 Dashboard [${currentSection.toUpperCase()}] geladen für: ${
+        sessionData.displayName
+      } (Admin-Rolle: ${sessionData.roleName}, Farbe: ${sessionData.roleColor})`
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
 // 🎯 ROOT REDIRECT - Automatische Weiterleitung von / zu Dashboard
 app.get("/", (req, res) => {
   logger.info("🔄 Root-Zugriff erkannt - Weiterleitung zum Dashboard");
@@ -580,72 +657,12 @@ app.get(
   })
 );
 
-app.get("/admin/discord/:guildId", (req, res, next) => {
-  try {
-    const { guildId } = req.params;
-    const sessionId = req.cookies.dashboard_session;
+// 📊 HAUPTROUTEN - SEPARATE ROUTEN STATT OPTIONALER PARAMETER
+// Route ohne Section (Standard = Dashboard)
+app.get("/admin/discord/:guildId", handleDashboardRequest);
 
-    if (guildId !== ALLOWED_GUILD_ID) {
-      logger.warn(`⚠️ Ungültige Guild ID angefordert: ${guildId}`);
-
-      const loginPage = createLoginPage(
-        "Ungültige Server-ID",
-        "Die angeforderte Server-ID ist nicht erlaubt. Du kannst nur auf das Dashboard des autorisierten Discord Servers zugreifen."
-      );
-
-      return res.status(403).send(loginPage);
-    }
-
-    if (!sessionId || !userSessions.has(sessionId)) {
-      logger.warn("⚠️ Dashboard-Zugriff ohne gültige Session");
-
-      const loginPage = createLoginPage(
-        "Session abgelaufen",
-        "Deine Anmeldung ist abgelaufen oder ungültig. Bitte melde dich erneut mit Discord an, um auf das Dashboard zuzugreifen."
-      );
-
-      return res.status(401).send(loginPage);
-    }
-
-    const sessionData = userSessions.get(sessionId);
-    const dashboardFile = path.join(dashboardPath, "html", "dashboard.html");
-
-    if (!fs.existsSync(dashboardFile)) {
-      throw new Error(`Dashboard-Datei nicht gefunden: ${dashboardFile}`);
-    }
-
-    let dashboardHtml = fs.readFileSync(dashboardFile, "utf8");
-
-    dashboardHtml = dashboardHtml.replace(
-      'href="../css/dashboard.css"',
-      'href="/css/dashboard.css"'
-    );
-
-    dashboardHtml = dashboardHtml.replace(
-      "<script>",
-      `<script>
-        window.serverData = {
-          guildName: "${sessionData.guildName}",
-          guildId: "${sessionData.guildId}",
-          userId: "${sessionData.userId}",
-          userName: "${sessionData.username}",
-          displayName: "${sessionData.displayName}",
-          avatarUrl: "${sessionData.avatarUrl}",
-          isAdmin: ${sessionData.isAdmin || false},
-          roleName: "${sessionData.roleName || "Member"}",
-          roleColor: "${sessionData.roleColor || "#99aab5"}", 
-          accountCreated: "${sessionData.accountCreated || sessionData.userId}"
-        };`
-    );
-
-    res.send(dashboardHtml);
-    logger.user(
-      `📊 Dashboard geladen für: ${sessionData.displayName} (Admin-Rolle: ${sessionData.roleName}, Farbe: ${sessionData.roleColor})`
-    );
-  } catch (error) {
-    next(error);
-  }
-});
+// Route mit Section
+app.get("/admin/discord/:guildId/:section", handleDashboardRequest);
 
 // Alternative Redirects für verschiedene Routen
 app.get("/dashboard.html", (req, res) => {
@@ -719,6 +736,9 @@ app.listen(port, () => {
   logger.info("Sessions werden alle 30 Minuten bereinigt");
   logger.info(`Root-Redirect aktiv: / → /admin/discord/${ALLOWED_GUILD_ID}`);
   logger.info("🎨 Admin-Rollenfarben-System aktiviert");
+  logger.info(
+    "📊 Section-Routing aktiviert: /admin/discord/:guildId und /admin/discord/:guildId/:section"
+  );
 });
 
 // Graceful Shutdown Handler
