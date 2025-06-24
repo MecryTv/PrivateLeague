@@ -430,6 +430,228 @@ body::-webkit-scrollbar {
   color: #7289da;
 }
 
+/* ===============================
+   CONTENT CARDS STYLING
+   =============================== */
+
+/* Dashboard Stats Card */
+.dashboard-stats-card {
+  background: rgba(67, 181, 129, 0.1);
+  border: 1px solid #43b581;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.dashboard-stats-card h3 {
+  color: #43b581;
+  margin-bottom: 10px;
+}
+
+.dashboard-stats-card p {
+  color: #b9bbbe;
+}
+
+/* Server Configuration Card */
+.server-config-card {
+  background: rgba(114, 137, 218, 0.1);
+  border: 1px solid #7289da;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.server-config-card h3 {
+  color: #7289da;
+  margin-bottom: 10px;
+}
+
+.server-config-card p {
+  color: #b9bbbe;
+}
+
+.server-config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.config-item {
+  background: rgba(35, 39, 42, 0.8);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.config-item h4 {
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.config-item p {
+  color: #b9bbbe;
+  font-size: 14px;
+}
+
+/* Moderation Tools Card */
+.moderation-tools-card {
+  background: rgba(240, 71, 71, 0.1);
+  border: 1px solid #f04747;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.moderation-tools-card h3 {
+  color: #f04747;
+  margin-bottom: 10px;
+}
+
+.moderation-tools-card p {
+  color: #b9bbbe;
+}
+
+.moderation-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.moderation-item {
+  background: rgba(35, 39, 42, 0.8);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.moderation-item h4 {
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.moderation-item p {
+  color: #b9bbbe;
+  font-size: 14px;
+}
+
+/* ===============================
+   AUFKLAPPBARE NAVIGATION STYLES
+   =============================== */
+
+/* Aufklappbare Navigation Styles */
+.nav-item-collapsible {
+  margin: 0;
+  position: relative;
+}
+
+.nav-link-collapsible {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px 25px;
+  color: #b9bbbe;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.nav-link-collapsible:hover {
+  background-color: rgba(114, 137, 218, 0.1);
+  color: #ffffff;
+  border-left-color: #7289da;
+  transform: translateX(2px);
+}
+
+.nav-link-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.nav-chevron {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  color: #b9bbbe;
+}
+
+.nav-item-collapsible.expanded .nav-chevron {
+  transform: rotate(90deg);
+  color: #7289da;
+}
+
+.nav-item-collapsible.expanded .nav-link-collapsible {
+  background-color: rgba(114, 137, 218, 0.1);
+  color: #ffffff;
+  border-left-color: #7289da;
+}
+
+/* Sub-Navigation */
+.sub-nav {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background-color: rgba(35, 39, 42, 0.5);
+}
+
+.nav-item-collapsible.expanded .sub-nav {
+  max-height: 400px; /* Ausreichend für alle Unterpunkte */
+}
+
+.sub-nav-item {
+  margin: 0;
+}
+
+.sub-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 25px 12px 60px; /* Links eingerückt */
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.sub-nav-link:hover {
+  background-color: rgba(114, 137, 218, 0.1);
+  color: #ffffff;
+  border-left-color: #7289da;
+  transform: translateX(2px);
+}
+
+.sub-nav-item.active .sub-nav-link {
+  background-color: rgba(114, 137, 218, 0.15);
+  color: #ffffff;
+  border-left-color: #7289da;
+  font-weight: 500;
+}
+
+.sub-nav-link i {
+  width: 16px;
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.sub-nav-link:hover i {
+  transform: scale(1.1);
+  color: #7289da;
+}
+
+.sub-nav-item.active .sub-nav-link i {
+  color: #7289da;
+  transform: scale(1.1);
+}
+
 /* Main Content Area - 🚫 SCROLLBAR KOMPLETT ENTFERNT */
 .dashboard-content {
   flex: 1;
@@ -558,6 +780,16 @@ body::-webkit-scrollbar {
     padding: 12px 20px;
     font-size: 15px;
   }
+
+  .nav-link-collapsible {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+
+  .sub-nav-link {
+    padding: 12px 20px 12px 50px;
+    font-size: 14px;
+  }
 }
 
 /* Mobile Design */
@@ -623,6 +855,12 @@ body::-webkit-scrollbar {
     overflow: hidden; /* 🚫 Mobile Content-Wrapper Scrollbar entfernt */
   }
 
+  /* Mobile Responsive für Sub-Navigation */
+  .sub-nav-link {
+    padding: 12px 20px 12px 50px;
+    font-size: 15px;
+  }
+
   /* Popup responsive */
   .user-popup {
     top: 80px;
@@ -685,6 +923,16 @@ body::-webkit-scrollbar {
     font-size: 16px;
   }
 
+  .nav-link-collapsible {
+    padding: 15px 25px;
+    font-size: 16px;
+  }
+
+  .sub-nav-link {
+    padding: 15px 25px 15px 55px;
+    font-size: 15px;
+  }
+
   .mobile-nav-toggle {
     width: 45px;
     height: 45px;
@@ -706,5 +954,250 @@ body::-webkit-scrollbar {
 @media (min-width: 769px) {
   .mobile-nav-toggle {
     display: none !important;
+  }
+}
+
+/* ===============================
+   AUFKLAPPBARE NAVIGATION STYLES
+   =============================== */
+
+/* Aufklappbare Navigation Styles */
+.nav-item-collapsible {
+  margin: 0;
+  position: relative;
+}
+
+.nav-link-collapsible {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px 25px;
+  color: #b9bbbe;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.nav-link-collapsible:hover {
+  background-color: rgba(114, 137, 218, 0.1);
+  color: #ffffff;
+  border-left-color: #7289da;
+  transform: translateX(2px);
+}
+
+.nav-link-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.nav-chevron {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  color: #b9bbbe;
+}
+
+.nav-item-collapsible.expanded .nav-chevron {
+  transform: rotate(90deg);
+  color: #7289da;
+}
+
+.nav-item-collapsible.expanded .nav-link-collapsible {
+  background-color: rgba(114, 137, 218, 0.1);
+  color: #ffffff;
+  border-left-color: #7289da;
+}
+
+/* Sub-Navigation */
+.sub-nav {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background-color: rgba(35, 39, 42, 0.5);
+}
+
+.nav-item-collapsible.expanded .sub-nav {
+  max-height: 400px; /* Ausreichend für alle Unterpunkte */
+}
+
+.sub-nav-item {
+  margin: 0;
+}
+
+.sub-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 25px 12px 60px; /* Links eingerückt */
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.sub-nav-link:hover {
+  background-color: rgba(114, 137, 218, 0.1);
+  color: #ffffff;
+  border-left-color: #7289da;
+  transform: translateX(2px);
+}
+
+.sub-nav-item.active .sub-nav-link {
+  background-color: rgba(114, 137, 218, 0.15);
+  color: #ffffff;
+  border-left-color: #7289da;
+  font-weight: 500;
+}
+
+.sub-nav-link i {
+  width: 16px;
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.sub-nav-link:hover i {
+  transform: scale(1.1);
+  color: #7289da;
+}
+
+.sub-nav-item.active .sub-nav-link i {
+  color: #7289da;
+  transform: scale(1.1);
+}
+
+/* ===============================
+   RL LIGA CONTENT SECTIONS STYLING
+   =============================== */
+
+/* Teams Section Styling */
+.teams-section-card {
+  background: rgba(67, 181, 129, 0.1);
+  border: 1px solid #43b581;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.teams-section-card h3 {
+  color: #43b581;
+  margin-bottom: 10px;
+}
+
+.teams-section-card p {
+  color: #b9bbbe;
+}
+
+/* Teamsuche Section Styling */
+.teamsuche-section-card {
+  background: rgba(114, 137, 218, 0.1);
+  border: 1px solid #7289da;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.teamsuche-section-card h3 {
+  color: #7289da;
+  margin-bottom: 10px;
+}
+
+.teamsuche-section-card p {
+  color: #b9bbbe;
+}
+
+/* Anmeldung Section Styling */
+.anmeldung-section-card {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid #ffc107;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.anmeldung-section-card h3 {
+  color: #ffc107;
+  margin-bottom: 10px;
+}
+
+.anmeldung-section-card p {
+  color: #b9bbbe;
+}
+
+/* Ergebnisse Section Styling */
+.ergebnisse-section-card {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid #dc3545;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.ergebnisse-section-card h3 {
+  color: #dc3545;
+  margin-bottom: 10px;
+}
+
+.ergebnisse-section-card p {
+  color: #b9bbbe;
+}
+
+/* Tabelle Section Styling */
+.tabelle-section-card {
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid #28a745;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.tabelle-section-card h3 {
+  color: #28a745;
+  margin-bottom: 10px;
+}
+
+.tabelle-section-card p {
+  color: #b9bbbe;
+}
+
+/* Spielplan Section Styling */
+.spielplan-section-card {
+  background: rgba(102, 16, 242, 0.1);
+  border: 1px solid #6610f2;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.spielplan-section-card h3 {
+  color: #6610f2;
+  margin-bottom: 10px;
+}
+
+.spielplan-section-card p {
+  color: #b9bbbe;
+}
+
+/* Mobile Responsive für Sub-Navigation - Update */
+@media (max-width: 768px) {
+  .sub-nav-link {
+    padding: 12px 20px 12px 50px !important;
+    font-size: 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sub-nav-link {
+    padding: 15px 25px 15px 55px !important;
+    font-size: 15px !important;
   }
 }
